@@ -1,4 +1,5 @@
-import React from "react";
+import React, {Component} from "react";
+import { Input, Menu, Segment } from 'semantic-ui-react'
 import fetch from "isomorphic-fetch";
 import { compose, withProps, withHandlers } from "recompose";
 import {
@@ -6,6 +7,7 @@ import {
   withGoogleMap,
   GoogleMap,
   Marker,
+  Circle,
   DirectionsRenderer
 } from "react-google-maps";
 import { MarkerClusterer } from "react-google-maps/lib/components/addons/MarkerClusterer";
@@ -31,39 +33,46 @@ const MapWithAMarkerClusterer = compose(
     {props.curr_pos && <Marker
       position={{lat:props.curr_pos.lat,lng:props.curr_pos.lng}}
     />}
-    {props.next_pos && <Marker
-      position={{lat:props.next_pos.lat,lng:props.next_pos.lng}}
+    {props.next_pos && <Circle
+      center ={{lat:props.next_pos.lat,lng:props.next_pos.lng}}
+      radius = {1000}
+      options = {{ fillColor: '#E40019'}}
     />}
     {props.directions && <DirectionsRenderer directions={props.directions} />}
   </GoogleMap>
 );
 
+
 export default class App extends React.PureComponent {
   componentWillMount() {
     this.setState({
+      activeVersion: 'one-Point',
       markers: [],
       curr_pos: null,
       next_pos: null})
   }
+  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
   onWindowRightClick = (x) => {
+    const {curr_pos, next_pos} = this.state;
     this.setState({
       curr_pos: {
         lat : x.latLng.lat(),
         lng : x.latLng.lng()
       }
     });
-    if (curr_pos & next_pos) this.drawDirection()
+    if(next_pos) this.drawDirection()
   }
 
   onWindowLeftClick = (x) => {
+    const {curr_pos, next_pos} = this.state;
     this.setState({
       next_pos: {
         lat : x.latLng.lat(),
         lng : x.latLng.lng()
       }
     });
-    if (curr_pos & next_pos) this.drawDirection()
+    if(curr_pos) this.drawDirection()
   }
 
   drawDirection = () => {
@@ -85,15 +94,25 @@ export default class App extends React.PureComponent {
   }
 
   render() {
+    const {activeItem, markers, curr_pos, next_pos, directions } = this.state;
     return (
-      <MapWithAMarkerClusterer
-        markers={this.state.markers}
-        onWindowRightClick={this.onWindowRightClick}
-        onWindowLeftClick={this.onWindowLeftClick}
-        curr_pos={this.state.curr_pos}
-        next_pos={this.state.next_pos}
-        directions={this.state.directions}
-      />
+      <div>
+        <Menu pointing>
+          <Menu.Item name='one-Point' active={activeItem === 'one-Point'} onClick={this.handleItemClick} />
+          <Menu.Item name='Multi-Point' active={activeItem === 'Multi-Point'} onClick={this.handleItemClick} />
+        </Menu>
+        <Segment>
+          <MapWithAMarkerClusterer
+            markers={markers}
+            onWindowRightClick={this.onWindowRightClick}
+            onWindowLeftClick={this.onWindowLeftClick}
+            curr_pos={curr_pos}
+            next_pos={next_pos}
+            directions={directions}
+          />
+        </Segment>
+      </div>
     )
   }
 }
+
