@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { Input, Menu, Segment } from 'semantic-ui-react'
+import { Button, Input, Menu, Segment,Icon} from 'semantic-ui-react'
 import fetch from "isomorphic-fetch";
 import { compose, withProps, withHandlers } from "recompose";
 import {
@@ -15,9 +15,9 @@ import { MarkerClusterer } from "react-google-maps/lib/components/addons/MarkerC
 const MapWithAMarkerClusterer = compose(
   withProps({
     googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyBsraKM3f33D2-Gevxy3UPW8UPzhR6fttM&v=3.exp&libraries=geometry,drawing,places",
-    loadingElement: <div style={{ height: `100%` }} />,
-    containerElement: <div style={{ height: `800px` }} />,
-    mapElement: <div style={{ height: `100%` }} />,
+    loadingElement: <div style={{ height: `80%` }} />,
+    containerElement: <div style={{ height: `700px` }} />,
+    mapElement: <div style={{ height: `97%` }} />,
   }),
   withHandlers({
   }),
@@ -46,12 +46,22 @@ const MapWithAMarkerClusterer = compose(
 export default class App extends React.PureComponent {
   componentWillMount() {
     this.setState({
-      activeVersion: 'one-Point',
+      activeItem: 'one-Point',
       markers: [],
       curr_pos: null,
-      next_pos: null})
+      next_pos: null,
+      directions:null
+    })
   }
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+
+  handleItemClick = (e, { name }) => {
+    this.setState({
+      activeItem: name,
+      curr_pos: null,
+      next_pos: null,
+      directions:null
+    })
+  }
 
   onWindowRightClick = (x) => {
     const {curr_pos, next_pos} = this.state;
@@ -61,7 +71,7 @@ export default class App extends React.PureComponent {
         lng : x.latLng.lng()
       }
     });
-    if(next_pos) this.drawDirection()
+    //if(next_pos) this.drawDirection()
   }
 
   onWindowLeftClick = (x) => {
@@ -72,7 +82,7 @@ export default class App extends React.PureComponent {
         lng : x.latLng.lng()
       }
     });
-    if(curr_pos) this.drawDirection()
+    //if(curr_pos) this.drawDirection()
   }
 
   drawDirection = () => {
@@ -96,12 +106,22 @@ export default class App extends React.PureComponent {
   render() {
     const {activeItem, markers, curr_pos, next_pos, directions } = this.state;
     return (
-      <div>
-        <Menu pointing>
-          <Menu.Item name='one-Point' active={activeItem === 'one-Point'} onClick={this.handleItemClick} />
-          <Menu.Item name='Multi-Point' active={activeItem === 'Multi-Point'} onClick={this.handleItemClick} />
+      <div className="App">
+        <Menu pointing color={"yellow"} >
+          <Menu.Item
+            name='one-Point'
+            active={activeItem === 'one-Point'}
+            onClick={this.handleItemClick}
+            />
+          <Menu.Item
+            name='Multi-Point'
+            active={activeItem === 'Multi-Point'}
+            onClick={this.handleItemClick} />
+          <Menu.Item position='right'>
+            <Icon fitted name="road" />
+          </Menu.Item>
         </Menu>
-        <Segment>
+        <Segment color="yellow">
           <MapWithAMarkerClusterer
             markers={markers}
             onWindowRightClick={this.onWindowRightClick}
@@ -110,9 +130,13 @@ export default class App extends React.PureComponent {
             next_pos={next_pos}
             directions={directions}
           />
+          <ButtonExampleFluid onClick={this.drawDirection}/>
         </Segment>
       </div>
     )
   }
 }
 
+const ButtonExampleFluid = (props) => (
+  <Button fluid onClick={props.onClick}>Find your Road</Button>
+)
