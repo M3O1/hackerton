@@ -37,7 +37,7 @@ const MapWithAMarkerClusterer = compose(
     { props.next_pos ? <Circle
       center ={{lat:props.next_pos.lat,lng:props.next_pos.lng}}
       radius = {1000}
-      options = {{ fillColor: '#E40019'}}
+      options = {{ fillColor: '#E40019', strokeColor: '#E40019', strokeOpacity:"0.0"}}
     /> : null }
 
     { props.directions && <DirectionsRenderer directions={props.directions} />}
@@ -46,7 +46,7 @@ const MapWithAMarkerClusterer = compose(
       return(<Circle
           center = {{lat:lat, lng:lng}}
           radius = {1000}
-          options = {{fillColor: '#E40019'}}
+          options = {{fillColor: '#E40019', strokeColor: '#E40019', strokeOpacity:"0.0" }}
           key = {idx}
         />) })
     }
@@ -56,7 +56,6 @@ const MapWithAMarkerClusterer = compose(
 const ButtonExampleFluid = (props) => (
   <Button fluid onClick={props.onClick}>Find your Road</Button>
 )
-
 
 export default class App extends React.PureComponent {
   componentWillMount() {
@@ -109,17 +108,6 @@ export default class App extends React.PureComponent {
         });
       })
     )
-  }
-
-  onWindowLeftClick = (x) => {
-    const {curr_pos, next_pos, activeItem} = this.state;
-    if (activeItem!=="one-Point") return;
-    this.setState({
-      next_pos: {
-        lat : x.latLng.lat(),
-        lng : x.latLng.lng()
-      }
-    });
   }
 
   drawDirection = () => {
