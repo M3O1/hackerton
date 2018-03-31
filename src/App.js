@@ -25,7 +25,7 @@ const MapWithAMarkerClusterer = compose(
   withGoogleMap
 )(props =>
   <GoogleMap
-    defaultZoom={10}
+    defaultZoom={12}
     defaultCenter={{ lat: 40.75, lng: -73.98 }}
     onClick={props.onWindowLeftClick}
     onRightClick={props.onWindowRightClick}
@@ -41,6 +41,10 @@ const MapWithAMarkerClusterer = compose(
     {props.directions && <DirectionsRenderer directions={props.directions} />}
   </GoogleMap>
 );
+
+const ButtonExampleFluid = (props) => (
+  <Button fluid onClick={props.onClick}>Find your Road</Button>
+)
 
 
 export default class App extends React.PureComponent {
@@ -71,18 +75,17 @@ export default class App extends React.PureComponent {
         lng : x.latLng.lng()
       }
     });
-    //if(next_pos) this.drawDirection()
   }
 
   onWindowLeftClick = (x) => {
-    const {curr_pos, next_pos} = this.state;
+    const {curr_pos, next_pos, activeItem} = this.state;
+    if (activeItem!=="one-Point") return;
     this.setState({
       next_pos: {
         lat : x.latLng.lat(),
         lng : x.latLng.lng()
       }
     });
-    //if(curr_pos) this.drawDirection()
   }
 
   drawDirection = () => {
@@ -136,7 +139,3 @@ export default class App extends React.PureComponent {
     )
   }
 }
-
-const ButtonExampleFluid = (props) => (
-  <Button fluid onClick={props.onClick}>Find your Road</Button>
-)
