@@ -33,12 +33,23 @@ const MapWithAMarkerClusterer = compose(
     {props.curr_pos && <Marker
       position={{lat:props.curr_pos.lat,lng:props.curr_pos.lng}}
     />}
-    {props.next_pos && <Circle
+
+    { props.next_pos ? <Circle
       center ={{lat:props.next_pos.lat,lng:props.next_pos.lng}}
       radius = {1000}
       options = {{ fillColor: '#E40019'}}
-    />}
-    {props.directions && <DirectionsRenderer directions={props.directions} />}
+    /> : null }
+
+    { props.directions && <DirectionsRenderer directions={props.directions} />}
+
+    {props.next_pos_list && props.next_pos_list.map( ({lat,lng},idx) => {
+      return(<Circle
+          center = {{lat:lat, lng:lng}}
+          radius = {1000}
+          options = {{fillColor: '#E40019'}}
+          key = {idx}
+        />) })
+    }
   </GoogleMap>
 );
 
@@ -54,6 +65,7 @@ export default class App extends React.PureComponent {
       markers: [],
       curr_pos: null,
       next_pos: null,
+      next_pos_list: null,
       directions:null
     })
   }
@@ -63,18 +75,40 @@ export default class App extends React.PureComponent {
       activeItem: name,
       curr_pos: null,
       next_pos: null,
+      next_pos_list: null,
       directions:null
     })
   }
 
   onWindowRightClick = (x) => {
-    const {curr_pos, next_pos} = this.state;
+    const {curr_pos, next_pos, activeItem} = this.state;
     this.setState({
       curr_pos: {
         lat : x.latLng.lat(),
         lng : x.latLng.lng()
       }
     });
+
+    (activeItem==='one-Point') ? (
+      fetch(`/single_point?lat=${x.latLng.lat()}&lng=${x.latLng.lng()}`)
+      .then(res => res.json())
+      .then(res => {
+        this.setState({
+          next_pos : {
+            lat : res.lat,
+            lng : res.lng
+          }
+        });
+      })
+    ) : (
+      fetch(`/multi_point?lat=${x.latLng.lat()}&lng=${x.latLng.lng()}`)
+      .then(res => res.json())
+      .then(res => {
+        this.setState({
+          next_pos_list : res
+        });
+      })
+    )
   }
 
   onWindowLeftClick = (x) => {
@@ -107,7 +141,7 @@ export default class App extends React.PureComponent {
   }
 
   render() {
-    const {activeItem, markers, curr_pos, next_pos, directions } = this.state;
+    const {activeItem, markers, curr_pos, next_pos, directions, next_pos_list } = this.state;
     return (
       <div className="App">
         <Menu pointing color={"yellow"} >
@@ -131,7 +165,9 @@ export default class App extends React.PureComponent {
             onWindowLeftClick={this.onWindowLeftClick}
             curr_pos={curr_pos}
             next_pos={next_pos}
+            next_pos_list={next_pos_list}
             directions={directions}
+            active={activeItem === 'one-Point'}
           />
           <ButtonExampleFluid onClick={this.drawDirection}/>
         </Segment>
